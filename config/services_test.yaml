@@ -1,0 +1,4 @@
+services:
+    App\Shared\Application\TransactionManager:
+        alias: App\Infrastructure\Database\DbalTransactionManager
+        public: true

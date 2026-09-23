@@ -21,5 +21,8 @@ services:
 
     App\Booking\Domain\BookingRepository:
         alias: App\Booking\Infrastructure\Persistence\DbalBookingRepository
-
+    App\Shared\Application\TransactionManager:
+        alias: App\Infrastructure\Database\DbalTransactionManager
+    App\Outbox\Domain\OutboxRepository:
+        alias: App\Outbox\Infrastructure\Persistence\DbalOutboxRepository
 
