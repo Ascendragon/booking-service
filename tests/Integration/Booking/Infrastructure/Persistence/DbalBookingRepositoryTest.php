@@ -86,11 +86,7 @@ class DbalBookingRepositoryTest extends KernelTestCase
 
         $this->repository->save($secondBooking);
 
-        dd(
-            $this->connection->fetchAllAssociative(
-                'SELECT id, slot_id, customer_id FROM bookings'
-            )
-        );
+
     }
 
 
