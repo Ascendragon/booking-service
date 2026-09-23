@@ -6,6 +6,7 @@ namespace App\Tests\Integration\Booking\Infrastructure\Persistence;
 
 use AllowDynamicProperties;
 use App\Booking\Domain\Booking;
+use App\Booking\Domain\Exception\SlotAlreadyBooked;
 use App\Booking\Infrastructure\Persistence\DbalBookingRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
@@ -63,6 +64,33 @@ class DbalBookingRepositoryTest extends KernelTestCase
         self::assertGreaterThan(0, $bookingId);
         self::assertTrue($this->repository->existsForSlot($this->slotId));
 
+    }
+
+    public function testCannotSaveTwoBookingsForSameSlot(): void
+    {
+        $firstBooking = Booking::create(
+            $this->slotId,
+            100,
+            new DateTimeImmutable('2030-01-01 10:00:00')
+        );
+
+        $secondBooking = Booking::create(
+            $this->slotId,
+            200,
+            new DateTimeImmutable('2030-01-01 10:01:00')
+        );
+
+        $this->repository->save($firstBooking);
+
+        $this->expectException(SlotAlreadyBooked::class);
+
+        $this->repository->save($secondBooking);
+
+        dd(
+            $this->connection->fetchAllAssociative(
+                'SELECT id, slot_id, customer_id FROM bookings'
+            )
+        );
     }
 
 
