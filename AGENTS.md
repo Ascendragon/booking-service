@@ -71,9 +71,10 @@ Three specifics worth spelling out, because they are easy to get wrong:
   passed up front and `--no-interaction` where supported: makers prompt on a
   terminal by default, which hangs a non-interactive shell. If a maker still
   needs interactive input, hand-write the code instead.
-- If Doctrine ORM is installed, schema changes go through migrations
-  (`bin/console make:migration`, then `doctrine:migrations:migrate`), never
-  `doctrine:schema:update` or hand-written SQL.
+- This project is DBAL-only. Schema changes go through Doctrine Migrations:
+  use `bin/console doctrine:migrations:generate`, edit the generated migration
+  SQL manually, then run `doctrine:migrations:migrate`. Do not use
+  `doctrine:migrations:diff`, `make:migration`, or `doctrine:schema:update`.
 - `.env` is committed and holds defaults only. Real secrets belong in `.env.local`
   (git-ignored) or the secrets vault (`bin/console secrets:set`), read via
   `%env(...)%`.

@@ -128,7 +128,7 @@ final class CreateBookingHandlerTest extends TestCase
             $event,
         );
         self::assertSame(
-            'BookingCreated',
+            'booking.created.v1',
             $event->eventType(),
         );
 

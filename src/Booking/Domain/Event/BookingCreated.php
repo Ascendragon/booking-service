@@ -17,7 +17,7 @@ final readonly class BookingCreated implements DomainEvent
 
     public function eventType(): string
     {
-        return 'BookingCreated';
+        return 'booking.created.v1';
     }
 
     public function payload(): array

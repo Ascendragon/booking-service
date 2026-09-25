@@ -59,7 +59,7 @@ final class CreateBookingHandlerIntegrationTest extends KernelTestCase
 
         self::assertSame(1, $bookingCount);
         self::assertIsArray($event);
-        self::assertSame('BookingCreated', $event['event_type']);
+        self::assertSame('booking.created.v1', $event['event_type']);
         self::assertSame('Booking', $event['aggregate_type']);
 
         $payload = json_decode($event['payload'], true, flags: JSON_THROW_ON_ERROR);

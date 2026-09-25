@@ -25,4 +25,6 @@ services:
         alias: App\Infrastructure\Database\DbalTransactionManager
     App\Outbox\Domain\OutboxRepository:
         alias: App\Outbox\Infrastructure\Persistence\DbalOutboxRepository
+    App\Outbox\Application\OutboxMessageRepository:
+        alias: App\Outbox\Infrastructure\Persistence\DbalOutboxMessageRepository
 

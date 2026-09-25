@@ -10,6 +10,7 @@ use App\Outbox\Infrastructure\Persistence\DbalOutboxRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Uid\Uuid;
 
 final class DbalOutboxRepositoryTest extends KernelTestCase
 {
@@ -52,9 +53,12 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
 
         self::assertIsArray($event);
 
+        self::assertTrue(
+            Uuid::isValid($event['event_id'])
+        );
 
         self::assertSame(
-            'BookingCreated',
+            'booking.created.v1',
             $event['event_type']
         );
 
@@ -83,7 +87,7 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
 
         self::assertSame(
             '2030-01-01 10:00:00',
-            $event['created_at'],
+            $event['occurred_at'],
         );
     }
 
