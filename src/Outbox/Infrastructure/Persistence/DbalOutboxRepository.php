@@ -5,32 +5,27 @@ declare(strict_types=1);
 namespace App\Outbox\Infrastructure\Persistence;
 
 use App\Outbox\Domain\OutboxRepository;
-use App\Shared\Clock;
+use App\Shared\Domain\DomainEvent;
 use Doctrine\DBAL\Connection;
 
 final class DbalOutboxRepository implements OutboxRepository
 {
     public function __construct(
         private Connection $connection,
-        private Clock $clock
     ) {
     }
 
     public function save(
-        string $eventType,
-        string $aggregateType,
-        int $aggregateId,
-        array $payload
+        DomainEvent $event,
     ): void {
         $this->connection->insert(
             'outbox_events',
             [
-                'event_type' => $eventType,
-                'aggregate_type' => $aggregateType,
-                'aggregate_id' => $aggregateId,
-                'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
-                'created_at' => $this->clock
-                    ->now()
+                'event_type' => $event->eventType(),
+                'aggregate_type' => $event->aggregateType(),
+                'aggregate_id' => $event->aggregateId(),
+                'payload' => json_encode($event->payload(), JSON_THROW_ON_ERROR),
+                'created_at' => $event->occurredAt()
                     ->format('Y-m-d H:i:s')
             ]
         );

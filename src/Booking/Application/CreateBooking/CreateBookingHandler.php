@@ -4,6 +4,7 @@ namespace App\Booking\Application\CreateBooking;
 
 use App\Booking\Domain\Booking;
 use App\Booking\Domain\BookingRepository;
+use App\Booking\Domain\Event\BookingCreated;
 use App\Booking\Domain\Exception\SlotAlreadyBooked;
 use App\Outbox\Domain\OutboxRepository;
 use App\Shared\Application\TransactionManager;
@@ -26,24 +27,23 @@ final class CreateBookingHandler
                 if ($this->bookingRepository->existsForSlot($command->slotId)) {
                     throw new SlotAlreadyBooked();
                 }
-
+                $occurredAt = $this->clock->now();
                 $booking = Booking::create(
                     $command->slotId,
                     $command->customerId,
-                    $this->clock->now()
+                    $occurredAt
                 );
 
                 $bookingId = $this->bookingRepository->save($booking);
 
+                $event = new BookingCreated(
+                    bookingId: $bookingId,
+                    slotId: $command->slotId,
+                    customerId: $command->customerId,
+                    occurredAt: $occurredAt,
+                );
                 $this->outboxRepository->save(
-                    'BookingCreated',
-                    'Booking',
-                    $bookingId,
-                    [
-                        'bookingId' => $bookingId,
-                        'slotId' => $command->slotId,
-                        'customerId' => $command->customerId,
-                    ]
+                    $event
                 );
 
                 return $bookingId;

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Booking\Application\CreateBooking;
 
 use App\Booking\Application\CreateBooking\CreateBookingCommand;
 use App\Booking\Application\CreateBooking\CreateBookingHandler;
+use App\Booking\Domain\Event\BookingCreated;
 use App\Booking\Domain\Booking;
 use App\Booking\Domain\Exception\SlotAlreadyBooked;
 use App\Tests\Fake\Booking\FakeBookingRepository;
@@ -104,7 +105,8 @@ final class CreateBookingHandlerTest extends TestCase
     {
         $repository = new FakeBookingRepository();
         $outbox = new FakeOutboxRepository();
-        $handler = new CreateBookingHandler($repository, new FakeClock(), new FakeTransactionManager(),$outbox );
+        $clock = new FakeClock();
+        $handler = new CreateBookingHandler($repository, $clock, new FakeTransactionManager(),$outbox );
 
         $id = $handler(
             new CreateBookingCommand(
@@ -119,28 +121,39 @@ final class CreateBookingHandlerTest extends TestCase
             $outbox->events
         );
 
-        self::assertSame(
-            'BookingCreated',
-            $outbox->events[0]['eventType'],
+        $event = $outbox->events[0];
+
+        self::assertInstanceOf(
+            BookingCreated::class,
+            $event,
         );
         self::assertSame(
+            'BookingCreated',
+            $event->eventType(),
+        );
+
+        self::assertSame(
             'Booking',
-            $outbox->events[0]['aggregateType'],
+            $event->aggregateType(),
         );
 
         self::assertSame(
             $id,
-            $outbox->events[0]['aggregateId'],
+            $event->aggregateId(),
         );
 
         self::assertSame(
-            1,
-            $outbox->events[0]['payload']['slotId'],
+            [
+                'bookingId' => $id,
+                'slotId' => 1,
+                'customerId' => 100,
+            ],
+            $event->payload(),
         );
 
-        self::assertSame(
-            100,
-            $outbox->events[0]['payload']['customerId'],
+        self::assertEquals(
+            $clock->now(),
+            $event->occurredAt(),
         );
     }
 }

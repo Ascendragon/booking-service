@@ -12,6 +12,7 @@ use App\Infrastructure\Clock\SystemClock;
 use App\Infrastructure\Database\DbalTransactionManager;
 use App\Outbox\Domain\OutboxRepository;
 use App\Outbox\Infrastructure\Persistence\DbalOutboxRepository;
+use App\Shared\Domain\DomainEvent;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -61,7 +62,7 @@ final class CreateBookingHandlerIntegrationTest extends KernelTestCase
         self::assertSame('BookingCreated', $event['event_type']);
         self::assertSame('Booking', $event['aggregate_type']);
 
-        $payload = json_decode($event['payload'], true, JSON_THROW_ON_ERROR);
+        $payload = json_decode($event['payload'], true, flags: JSON_THROW_ON_ERROR);
 
         self::assertSame($bookingId, $payload['bookingId']);
         self::assertSame($slotId, $payload['slotId']);
@@ -96,10 +97,7 @@ final class CreateBookingHandlerIntegrationTest extends KernelTestCase
 
         $failingOutbox = new class implements OutboxRepository {
             public function save(
-                string $eventType,
-                string $aggregateType,
-                int $aggregateId,
-                array $payload
+                DomainEvent $event,
             ): void {
                 throw new \RuntimeException('Outbox unavailable');
             }

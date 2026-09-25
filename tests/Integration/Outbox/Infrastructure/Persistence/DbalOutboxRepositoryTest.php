@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Outbox\Infrastructure\Persistence;
 
 
-use App\Infrastructure\Clock\SystemClock;
+use App\Booking\Domain\Event\BookingCreated;
 use App\Outbox\Infrastructure\Persistence\DbalOutboxRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -26,7 +27,7 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
 
 
         $this->repository = new DbalOutboxRepository(
-            $this->connection, new SystemClock()
+            $this->connection
         );
 
         $this->connection->delete('outbox_events');
@@ -36,14 +37,12 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
     public function testSaveOutboxEvent(): void
     {
         $this->repository->save(
-            'BookingCreated',
-            'Booking',
-            123,
-            [
-                'bookingId' => 123,
-                'slotId' => 10,
-                'customerId' => 100,
-            ]
+            new BookingCreated(
+                bookingId: 123,
+                slotId: 10,
+                customerId: 100,
+                occurredAt: new DateTimeImmutable('2030-01-01 10:00:00'),
+            )
         );
 
 
@@ -70,7 +69,6 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
         );
 
 
-
         $payload = json_decode(
             $event['payload'],
             true,
@@ -82,8 +80,12 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
             10,
             $payload['slotId']
         );
-    }
 
+        self::assertSame(
+            '2030-01-01 10:00:00',
+            $event['created_at'],
+        );
+    }
 
 
 }

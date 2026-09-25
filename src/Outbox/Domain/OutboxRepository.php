@@ -2,12 +2,11 @@
 
 namespace App\Outbox\Domain;
 
+use App\Shared\Domain\DomainEvent;
+
 interface OutboxRepository
 {
     public function save(
-        string $eventType,
-        string $aggregateType,
-        int $aggregateId,
-        array $payload
+        DomainEvent $event,
     ): void;
 }

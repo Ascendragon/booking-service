@@ -2,16 +2,20 @@
 
 namespace App\Booking\Domain\Event;
 
-final readonly class BookingCreated
+use App\Shared\Domain\DomainEvent;
+use DateTimeImmutable;
+
+final readonly class BookingCreated implements DomainEvent
 {
     public function __construct(
         public int $bookingId,
         public int $slotId,
         public int $customerId,
+        private DateTimeImmutable $occurredAt,
     ) {
     }
 
-    public function eventName(): string
+    public function eventType(): string
     {
         return 'BookingCreated';
     }
@@ -23,5 +27,17 @@ final readonly class BookingCreated
             'slotId' => $this->slotId,
             'customerId' => $this->customerId,
         ];
+    }
+    public function occurredAt(): DateTimeImmutable
+    {
+        return $this->occurredAt;
+    }
+    public function aggregateId(): int
+    {
+        return $this->bookingId;
+    }
+    public function aggregateType(): string
+    {
+        return 'Booking';
     }
 }
