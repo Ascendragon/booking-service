@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Outbox\Infrastructure\Persistence;
 
+
 use App\Infrastructure\Clock\SystemClock;
 use App\Outbox\Infrastructure\Persistence\DbalOutboxRepository;
-use App\Shared\Clock;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -51,6 +51,8 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
             'SELECT * FROM outbox_events LIMIT 1'
         );
 
+        self::assertIsArray($event);
+
 
         self::assertSame(
             'BookingCreated',
@@ -68,9 +70,11 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
         );
 
 
+
         $payload = json_decode(
             $event['payload'],
-            true
+            true,
+            flags: JSON_THROW_ON_ERROR
         );
 
 
@@ -79,4 +83,7 @@ final class DbalOutboxRepositoryTest extends KernelTestCase
             $payload['slotId']
         );
     }
+
+
+
 }

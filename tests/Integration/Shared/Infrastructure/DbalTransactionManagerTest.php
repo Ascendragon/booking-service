@@ -2,16 +2,14 @@
 
 namespace App\Tests\Integration\Shared\Infrastructure;
 
-
-
-use App\Shared\Application\TransactionManager;
+use App\Infrastructure\Database\DbalTransactionManager;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class DbalTransactionManagerTest extends KernelTestCase
 {
     private Connection $connection;
-    private TransactionManager $transactionManager;
+    private DbalTransactionManager $transactionManager;
     protected function setUp(): void
     {
         parent::setUp();
@@ -20,9 +18,14 @@ class DbalTransactionManagerTest extends KernelTestCase
         $this->connection = self::getContainer()->get(Connection::class);
 
 
+        $this->connection->delete('outbox_events');
+        $this->connection->delete('bookings');
+        $this->connection->delete('slots');
         $this->connection->delete('employees');
 
-        $this->transactionManager = self::getContainer()->get(TransactionManager::class);
+        $this->transactionManager = new DbalTransactionManager(
+            $this->connection
+        );
 
 
     }
